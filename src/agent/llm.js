@@ -4,9 +4,10 @@ dotenv.config();
 
 const GEMINI_CANDIDATES = [
   process.env.GEMINI_MODEL,
-  "gemini-3.1-flash-lite",
-  "gemini-flash-lite-latest",
   "gemini-2.5-flash",
+  "gemini-1.5-flash",
+  "gemini-2.0-flash",
+  "gemini-1.5-pro",
 ].filter(Boolean);
 
 let activeWorkingModelName = null;

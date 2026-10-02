@@ -81,9 +81,13 @@ export function appendSOP(newSop, filePath = DEFAULT_SOP_PATH) {
     parsed.sops.push(newSop);
   }
 
-  parsed.last_updated = new Date().toISOString();
-  const updatedYaml = dump(parsed, { indent: 2, lineWidth: -1 });
-  fs.writeFileSync(filePath, updatedYaml, "utf8");
+  try {
+    fs.writeFileSync(filePath, updatedYaml, "utf8");
+  } catch (fsErr) {
+    console.warn(`[SOP Loader] Warning: Could not write to disk (${fsErr.message}). Persisting in-memory.`);
+    cachedSops = parsed.sops;
+    return cachedSops;
+  }
 
   // Force cache refresh
   return loadSOPs(filePath);
