@@ -1,13 +1,11 @@
-/**
- * Grounded Response Generator & Fact Verification Engine
- * Enforces strict SOP traceability, factual numerical grounding,
- * and deterministic verification against hallucinated metrics.
- */
+import { getLLM } from "./llm.js";
 
 /**
  * Format a grounded, policy-traceable response when SOPs match.
+ * If an LLM (Gemini / OpenAI) is configured via API key in .env, invokes the model
+ * under strict grounding constraints. Otherwise, uses authoritative template.
  */
-export function generateGroundedResponse({
+export async function generateGroundedResponse({
   locationName,
   activity,
   timeframe,
@@ -27,6 +25,57 @@ export function generateGroundedResponse({
 
   const citations = [primarySop.id, ...(secondarySops || []).map(s => s.id)];
 
+  // Check if an external LLM is configured
+  const { model, provider } = await getLLM();
+
+  if (model) {
+    try {
+      const prompt = `
+You are MediBuddy's Weather-Advisory Assistant (#wehealbycode).
+Your job is ONLY to compose natural, clear, empathetic conversational language based on the authoritative company Standard Operating Procedure (SOP) provided below.
+
+NON-NEGOTIABLE SAFETY CONSTRAINTS:
+1. You must ALWAYS cite the binding policy: [${primarySop.id}: ${primarySop.title}].
+2. You must quote the EXACT live weather metrics provided (Temperature: ${temp}, Wind: ${wind}, Gusts: ${metrics.wind_gusts_10m} km/h, Rain: ${rain}, Probability: ${rainProb}, UV: ${uv}).
+3. You must NEVER invent, assume, or modify safety advice outside the provided SOP guidance and required actions.
+4. If secondary co-advisories are present, list them clearly with their SOP IDs.
+
+CONTEXT DATA:
+- Location: ${locationName} (${windowLabel})
+- User Activity: ${activity || "outdoor activity"}
+- Live Weather: Temperature ${temp}, Wind ${wind} (Gusts ${metrics.wind_gusts_10m} km/h), Precipitation ${rain} (${rainProb}), UV Index ${uv}
+- Primary SOP ID: ${primarySop.id}
+- Primary SOP Title: ${primarySop.title}
+- Primary Severity: ${primarySop.severity}
+- Policy Guidance: ${primarySop.guidance}
+- Required Safety Actions: ${JSON.stringify(primarySop.required_actions || [])}
+- Secondary Co-Advisories: ${JSON.stringify((secondarySops || []).map(s => `[${s.id}: ${s.title}] (${s.severity}): ${s.guidance}`))}
+
+Now, compose the response for the user strictly adhering to the policy guidance and citing [${primarySop.id}]. End with a note that this advice is grounded in MediBuddy SOPs.
+`;
+
+      const response = await model.invoke(prompt);
+      const outputText = typeof response === "string" ? response : (response.content || String(response));
+
+      return {
+        response: outputText,
+        citations,
+        metricsQuoted: {
+          temperature_2m: metrics.temperature_2m,
+          wind_speed_10m: metrics.wind_speed_10m,
+          wind_gusts_10m: metrics.wind_gusts_10m,
+          precipitation: metrics.precipitation,
+          precipitation_probability: metrics.precipitation_probability,
+          uv_index: metrics.uv_index,
+        },
+        provider,
+      };
+    } catch (llmErr) {
+      console.warn(`[LLM Layer] Call to ${provider} failed, using authoritative template:`, llmErr.message);
+    }
+  }
+
+  // Authoritative Deterministic Grounding Template (Fallback / Default)
   let text = `### Weather Advisory: ${locationName} (${windowLabel})\n\n`;
 
   // 1. Live Weather Data Grounding Block (strictly from Open-Meteo)
@@ -76,7 +125,8 @@ export function generateGroundedResponse({
       precipitation: metrics.precipitation,
       precipitation_probability: metrics.precipitation_probability,
       uv_index: metrics.uv_index,
-    }
+    },
+    provider: "deterministic-policy-engine",
   };
 }
 

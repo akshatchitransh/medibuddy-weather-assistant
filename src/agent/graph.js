@@ -123,7 +123,7 @@ async function evaluateSopsNode(state) {
 
 // 4. Node: Grounded Response Generation (Strictly cites SOP policies and weather)
 async function groundedResponseNode(state) {
-  const genResult = generateGroundedResponse({
+  const genResult = await generateGroundedResponse({
     locationName: state.location?.name,
     activity: state.intent?.activity,
     timeframe: state.intent?.timeframe,
