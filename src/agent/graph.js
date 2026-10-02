@@ -129,11 +129,39 @@ async function groundedResponseNode(state) {
     timeframe: state.intent?.timeframe,
     weatherData: state.weather,
     sopEvaluation: state.sopEvaluation,
+    userQuery: state.userInput,
+    conversationHistory: state.messages || [],
+    sessionFacts: state.sessionFacts || {},
   });
+
+  const prevDecisions = state.sessionFacts?.decisionLog || [];
+  const newDecision = {
+    turn: prevDecisions.length + 1,
+    query: state.userInput,
+    location: state.location?.name,
+    activity: state.intent?.activity,
+    timeframe: state.intent?.timeframe,
+    sopId: state.sopEvaluation?.primarySop?.id,
+    severity: state.sopEvaluation?.primarySop?.severity,
+    window: state.weather?.windowLabel,
+    timestamp: new Date().toISOString(),
+  };
+
+  const updatedSessionFacts = {
+    lastLocation: state.location?.name,
+    lastActivity: state.intent?.activity,
+    lastTimeframe: state.intent?.timeframe,
+    lastSopId: state.sopEvaluation?.primarySop?.id,
+    lastSeverity: state.sopEvaluation?.primarySop?.severity,
+    lastSummary: state.sopEvaluation?.primarySop?.title,
+    decisionLog: [...prevDecisions, newDecision],
+  };
 
   return {
     response: genResult.response,
     citations: genResult.citations,
+    sessionFacts: updatedSessionFacts,
+    messages: [{ role: "assistant", content: genResult.response }],
     status: "RESPONSE_GENERATED",
   };
 }
@@ -155,6 +183,7 @@ async function clarificationNode(state) {
   return {
     response: res.response,
     citations: res.citations,
+    messages: [{ role: "assistant", content: res.response }],
     status: "CLARIFICATION_NEEDED",
   };
 }
@@ -164,6 +193,7 @@ async function locationErrorNode(state) {
   return {
     response: res.response,
     citations: res.citations,
+    messages: [{ role: "assistant", content: res.response }],
     status: "LOCATION_NOT_FOUND",
   };
 }
@@ -173,6 +203,7 @@ async function weatherErrorNode(state) {
   return {
     response: res.response,
     citations: res.citations,
+    messages: [{ role: "assistant", content: res.response }],
     status: "WEATHER_ERROR",
   };
 }
@@ -186,6 +217,7 @@ async function noSopMatchNode(state) {
   return {
     response: res.response,
     citations: res.citations,
+    messages: [{ role: "assistant", content: res.response }],
     status: "NO_SOP_MATCH",
   };
 }

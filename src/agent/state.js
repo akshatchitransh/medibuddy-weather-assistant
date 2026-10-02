@@ -89,6 +89,20 @@ export const AgentState = Annotation.Root({
     default: () => "INIT",
   }),
 
+  // Structured Session Facts & Decision Log across turns
+  sessionFacts: Annotation({
+    reducer: (prev, next) => (next ? { ...(prev || {}), ...next } : prev),
+    default: () => ({
+      lastLocation: null,
+      lastActivity: null,
+      lastTimeframe: null,
+      lastSopId: null,
+      lastSeverity: null,
+      lastSummary: null,
+      decisionLog: [],
+    }),
+  }),
+
   // Grounding verification report
   verification: Annotation({
     reducer: (prev, next) => next ?? prev ?? null,

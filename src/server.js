@@ -85,10 +85,11 @@ app.post("/api/chat", async (req, res) => {
       }
     };
 
-    // Invoke LangGraph state graph
+    // Invoke LangGraph state graph with turn messages
     const result = await weatherAdvisoryGraph.invoke({
       sessionId,
       userInput: message.trim(),
+      messages: [{ role: "user", content: message.trim() }],
     }, threadConfig);
 
     // Save message turn in session log

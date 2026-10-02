@@ -45,7 +45,7 @@ const KNOWN_CITIES = [
   "new york", "paris", "tokyo", "springfield", "singapore", "dubai"
 ];
 
-import { getLLM } from "./llm.js";
+import { invokeLLM } from "./llm.js";
 
 /**
  * Extract intent and entities from current query and merge with session memory.
@@ -58,10 +58,19 @@ import { getLLM } from "./llm.js";
 export async function extractIntentAndEntities(query, previousState = {}) {
   const q = (query || "").toLowerCase();
 
-  // Step 1: Use LLM (Google Gemini) for Natural Language Extraction when available
-  const { model } = await getLLM();
-  if (model && query && query.trim().length > 0) {
+  const prevLocation = previousState.location?.name || previousState.sessionFacts?.lastLocation || null;
+  const prevActivity = previousState.intent?.activity || previousState.sessionFacts?.lastActivity || null;
+  const prevGroup = previousState.intent?.target_group || previousState.sessionFacts?.lastTargetGroup || "all";
+  const prevTimeframe = previousState.intent?.timeframe || previousState.sessionFacts?.lastTimeframe || "now";
+
+  // Step 1: Use LLM for Natural Language Extraction when available
+  if (query && query.trim().length > 0) {
     try {
+      const recentTurns = (previousState.messages || [])
+        .slice(-4)
+        .map(m => `${m.role === "user" ? "User" : "Assistant"}: ${m.content.slice(0, 120)}`)
+        .join("\n");
+
       const prompt = `
 You are an entity extractor for an outdoor activity weather safety assistant.
 Extract the outdoor activity, location, target demographic, and timeframe from the user's message.
@@ -69,42 +78,45 @@ Return ONLY a valid JSON object with NO markdown formatting, NO backticks.
 
 Schema:
 {
-  "location_name": string or null (properly capitalized city/location name),
+  "location_name": string or null (properly capitalized city/location name, e.g. "Bhopal", "Gorakhpur"),
   "activity": string or null (normalized to: cycling, running, walking, picnic, travel, sports, pet_walk),
   "timeframe": string (now, morning, afternoon, evening, tomorrow),
   "target_group": string (all, children, elderly, pets, sensitive)
 }
 
 Previous Conversation Context:
-- Previous Location: "${previousState.location?.name || ""}"
-- Previous Activity: "${previousState.intent?.activity || ""}"
+- Previous Location: "${prevLocation || ""}"
+- Previous Activity: "${prevActivity || ""}"
+- Previous Timeframe: "${prevTimeframe || ""}"
+${recentTurns ? `Recent Turns:\n${recentTurns}\n` : ""}
+
+IMPORTANT INSTRUCTION FOR FOLLOW-UPS:
+If the user's message is a conversational follow-up (e.g., "what about this evening instead?", "how about tomorrow?", "is it safe now?"), preserve the previous location and activity unless the user explicitly specified a different city or activity.
 
 User Message: "${query.replace(/"/g, '\\"')}"
 `;
 
-      const response = await model.invoke(prompt);
-      const rawText = typeof response === "string" ? response : (response.content || String(response));
-      const cleanJson = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
-      const parsed = JSON.parse(cleanJson);
+      const { text: rawText, provider } = await invokeLLM(prompt);
 
-      if (parsed) {
-        const prevLocation = previousState.location?.name || null;
-        const prevActivity = previousState.intent?.activity || null;
-        const prevGroup = previousState.intent?.target_group || "all";
+      if (rawText) {
+        const cleanJson = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
+        const parsed = JSON.parse(cleanJson);
 
-        const effectiveLocation = parsed.location_name || prevLocation;
-        const effectiveActivity = parsed.activity || prevActivity;
-        const effectiveGroup = (parsed.target_group && parsed.target_group !== "all") ? parsed.target_group : prevGroup;
-        const effectiveTimeframe = parsed.timeframe || "now";
+        if (parsed) {
+          const effectiveLocation = parsed.location_name || prevLocation;
+          const effectiveActivity = parsed.activity || prevActivity;
+          const effectiveGroup = (parsed.target_group && parsed.target_group !== "all") ? parsed.target_group : prevGroup;
+          const effectiveTimeframe = parsed.timeframe || "now";
 
-        return {
-          location_name: effectiveLocation ? effectiveLocation.charAt(0).toUpperCase() + effectiveLocation.slice(1) : null,
-          activity: effectiveActivity,
-          target_group: effectiveGroup,
-          timeframe: effectiveTimeframe,
-          extractedBy: "Google Gemini",
-          isFollowUp: !parsed.location_name && !parsed.activity && (!!prevLocation || !!prevActivity),
-        };
+          return {
+            location_name: effectiveLocation ? effectiveLocation.charAt(0).toUpperCase() + effectiveLocation.slice(1) : null,
+            activity: effectiveActivity,
+            target_group: effectiveGroup,
+            timeframe: effectiveTimeframe,
+            extractedBy: provider,
+            isFollowUp: !parsed.location_name && !parsed.activity && (!!prevLocation || !!prevActivity),
+          };
+        }
       }
     } catch (llmErr) {
       console.warn(`[Extractor Layer] LLM extraction error, falling back to deterministic extractor:`, llmErr.message);
@@ -176,10 +188,6 @@ User Message: "${query.replace(/"/g, '\\"')}"
 
   // 5. Contextual Memory Carrying (Multi-turn conversational continuity)
   // If user says "what about this evening?" or just specifies city "in Gorakhpur", carry forward context!
-  const prevLocation = previousState.location?.name || null;
-  const prevActivity = previousState.intent?.activity || null;
-  const prevGroup = previousState.intent?.target_group || "all";
-
   const effectiveLocation = detectedLocation || prevLocation;
   const effectiveActivity = detectedActivity || prevActivity;
   const effectiveGroup = detectedGroup !== "all" ? detectedGroup : prevGroup;

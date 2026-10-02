@@ -1,6 +1,111 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./App.css";
 
+function renderInlineFormatting(text) {
+  if (!text) return "";
+  const parts = [];
+  // Tokenize **bold**, [SOP-...], and *italic*
+  const regex = /(\*\*[^*]+\*\*|\[SOP-[^\]]+\]|\*[^*]+\*)/g;
+  let lastIndex = 0;
+  let match;
+
+  while ((match = regex.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      parts.push(text.slice(lastIndex, match.index));
+    }
+    const token = match[0];
+    if (token.startsWith("**") && token.endsWith("**")) {
+      parts.push(<strong key={match.index}>{token.slice(2, -2)}</strong>);
+    } else if (token.startsWith("[SOP-") && token.endsWith("]")) {
+      parts.push(<span key={match.index} className="sop-inline-ref">{token}</span>);
+    } else if (token.startsWith("*") && token.endsWith("*")) {
+      parts.push(<em key={match.index}>{token.slice(1, -1)}</em>);
+    }
+    lastIndex = regex.lastIndex;
+  }
+  if (lastIndex < text.length) {
+    parts.push(text.slice(lastIndex));
+  }
+  return parts.length > 0 ? parts : text;
+}
+
+function FormattedMessage({ content }) {
+  if (!content) return null;
+
+  // Split into block paragraphs
+  const rawBlocks = content.split(/\n\s*\n/);
+
+  return (
+    <div className="formatted-message-body">
+      {rawBlocks.map((block, bIdx) => {
+        const trimmed = block.trim();
+        if (!trimmed) return null;
+
+        // Headers
+        if (trimmed.startsWith("### ")) {
+          return <h3 key={bIdx}>{renderInlineFormatting(trimmed.replace("### ", ""))}</h3>;
+        }
+        if (trimmed.startsWith("#### ")) {
+          return <h4 key={bIdx}>{renderInlineFormatting(trimmed.replace("#### ", ""))}</h4>;
+        }
+
+        // Callout quotes
+        if (trimmed.startsWith("> ") || trimmed.startsWith("| ")) {
+          return (
+            <blockquote key={bIdx} className="message-callout">
+              {renderInlineFormatting(trimmed.replace(/^[>|]\s*/, ""))}
+            </blockquote>
+          );
+        }
+
+        // Lines within block
+        const lines = trimmed.split("\n");
+        const hasBullets = lines.some(l => l.trim().startsWith("* ") || l.trim().startsWith("- "));
+
+        if (hasBullets) {
+          const subElements = [];
+          let currentList = [];
+
+          lines.forEach((line, lIdx) => {
+            const lTrim = line.trim();
+            if (lTrim.startsWith("* ") || lTrim.startsWith("- ")) {
+              currentList.push(lTrim.replace(/^[\*\-]\s+/, ""));
+            } else {
+              if (currentList.length > 0) {
+                subElements.push(
+                  <ul key={`ul-${lIdx}`} className="message-bullet-list">
+                    {currentList.map((item, idx) => (
+                      <li key={idx}>{renderInlineFormatting(item)}</li>
+                    ))}
+                  </ul>
+                );
+                currentList = [];
+              }
+              if (lTrim.length > 0) {
+                subElements.push(<p key={`p-${lIdx}`}>{renderInlineFormatting(lTrim)}</p>);
+              }
+            }
+          });
+
+          if (currentList.length > 0) {
+            subElements.push(
+              <ul key={`ul-end`} className="message-bullet-list">
+                {currentList.map((item, idx) => (
+                  <li key={idx}>{renderInlineFormatting(item)}</li>
+                ))}
+              </ul>
+            );
+          }
+
+          return <div key={bIdx} className="mixed-block">{subElements}</div>;
+        }
+
+        return <p key={bIdx}>{renderInlineFormatting(trimmed)}</p>;
+      })}
+    </div>
+  );
+}
+
 export default function App() {
   const [sessionId, setSessionId] = useState(() => "session-" + Math.random().toString(36).substring(2, 9));
   const [messages, setMessages] = useState([
@@ -245,18 +350,7 @@ export default function App() {
                   </div>
 
                   <div className="message-text">
-                    {m.content.split("\n\n").map((para, pIdx) => {
-                      if (para.startsWith("### ")) {
-                        return <h3 key={pIdx}>{para.replace("### ", "")}</h3>;
-                      }
-                      if (para.startsWith("#### ")) {
-                        return <h4 key={pIdx}>{para.replace("#### ", "")}</h4>;
-                      }
-                      if (para.startsWith("> ")) {
-                        return <blockquote key={pIdx}>{para.replace("> ", "")}</blockquote>;
-                      }
-                      return <p key={pIdx}>{para}</p>;
-                    })}
+                    <FormattedMessage content={m.content} />
                   </div>
 
                   {m.citations && m.citations.length > 0 && (

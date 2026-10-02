@@ -242,13 +242,71 @@
   margin-bottom: 8px;
 }
 
+.message-text strong {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.message-row.user .message-text strong {
+  color: #ffffff;
+}
+
+.message-bullet-list {
+  margin: 6px 0 10px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.message-bullet-list li {
+  color: #334155;
+  line-height: 1.5;
+  font-size: 13.5px;
+}
+
+.message-row.user .message-bullet-list li {
+  color: #f1f5f9;
+}
+
+.sop-inline-ref {
+  background-color: #e0f2fe;
+  color: #0369a1;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 4px;
+  border: 1px solid #bae6fd;
+  display: inline-block;
+  margin: 0 2px;
+}
+
+.message-row.user .sop-inline-ref {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.message-callout {
+  border-left: 3px solid #00a896;
+  padding: 8px 12px;
+  background: #f0fdf4;
+  border-radius: 0 8px 8px 0;
+  font-style: italic;
+  color: #166534;
+  margin: 10px 0;
+  font-size: 12.5px;
+}
+
 .message-text blockquote {
   border-left: 3px solid #00a896;
-  padding-left: 10px;
+  padding: 8px 12px;
+  background: #f0fdf4;
+  border-radius: 0 8px 8px 0;
   font-style: italic;
-  color: #475569;
-  margin-top: 10px;
-  font-size: 12px;
+  color: #166534;
+  margin: 10px 0;
+  font-size: 12.5px;
 }
 
 .citation-tags {
