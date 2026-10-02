@@ -1,0 +1,321 @@
+version: 1.0.0
+last_updated: '2026-10-02T17:51:20.964Z'
+sops:
+  - id: SOP-SEV-001
+    title: IMD Well-Marked Low Pressure System & Severe Monsoon Depression
+    category: severe_weather_system
+    scope: global
+    target_activities:
+      - all
+    target_groups:
+      - all
+    severity: CRITICAL
+    priority: 100
+    conditions:
+      any_of:
+        - precipitation:
+            gte: 25
+        - wind_gusts_10m:
+            gte: 55
+        - composite:
+            precipitation_probability:
+              gte: 85
+            precipitation:
+              gte: 15
+    summary: Active deep monsoon depression or well-marked low-pressure area causing widespread torrential rain, localized inundation, and squally winds.
+    guidance: A severe IMD-flagged rain system / deep depression is actively impacting the region. Suspend all non-essential outdoor activities immediately regardless of activity type. High risk of waterlogging, zero-visibility rain curtains, and tree/pole collapses.
+    required_actions:
+      - Remain indoors in sturdy shelter
+      - Avoid all two-wheeler, bicycle, and non-emergency road transit
+      - Monitor local district disaster management alerts
+  - id: SOP-SEV-002
+    title: Severe Thunderstorm, Squalls and Lightning Hazard
+    category: severe_weather_system
+    scope: global
+    target_activities:
+      - all
+    target_groups:
+      - all
+    severity: CRITICAL
+    priority: 95
+    conditions:
+      any_of:
+        - weather_code:
+            in:
+              - 95
+              - 96
+              - 99
+        - wind_speed_10m:
+            gte: 50
+    summary: Active thunderstorm activity with high probability of lightning strikes and hazardous gusts.
+    guidance: Severe thunderstorm activity detected. Lightning presents immediate life-threatening risk in open areas, sports fields, and parks. Immediately seek fully enclosed indoor shelter.
+    required_actions:
+      - Cease outdoor activities immediately
+      - Do not seek shelter under isolated trees, metal fences, or tin sheds
+  - id: SOP-CYC-001
+    title: High Wind Hazard for Two-Wheelers and Cyclists
+    category: outdoor_exercise
+    scope: activity_specific
+    target_activities:
+      - cycling
+      - bike
+      - biking
+      - motorcycle
+      - scooter
+      - two-wheeler
+      - e-bike
+    target_groups:
+      - all
+    severity: DANGER
+    priority: 80
+    conditions:
+      wind_speed_10m:
+        gte: 40
+    summary: Crosswinds exceeding 40 km/h severely destabilize two-wheelers and lightweight pedal cycles.
+    guidance: Sustained winds above 40 km/h cause loss of directional steering control and push riders into adjacent vehicular lanes. Cycling or riding a motorized two-wheeler is unsafe under these conditions.
+    required_actions:
+      - Do not ride bicycles, motorcycles, or scooters
+      - Switch to four-wheeled transit or postpone journey
+  - id: SOP-CYC-002
+    title: Wet Surface & Reduced Traction Caution for Two-Wheelers
+    category: outdoor_exercise
+    scope: activity_specific
+    target_activities:
+      - cycling
+      - bike
+      - biking
+      - motorcycle
+      - scooter
+      - two-wheeler
+    target_groups:
+      - all
+    severity: CAUTION
+    priority: 50
+    conditions:
+      precipitation:
+        gte: 2
+        lt: 15
+    summary: Slick asphalt and braking distance deterioration during light to moderate rain.
+    guidance: Road surfaces are wet with reduced braking grip. Cyclists and two-wheeler commuters face skidding hazards on painted lane markers, metal utility covers, and corner turns.
+    required_actions:
+      - Reduce speed by at least 30%
+      - Ensure high-visibility reflective rain gear and front/rear lights are activated
+  - id: SOP-RUN-001
+    title: Extreme Heat Index Risk for Vigorous Cardio / Runners
+    category: outdoor_exercise
+    scope: activity_specific
+    target_activities:
+      - running
+      - jogging
+      - marathon
+      - sprint
+      - cardio
+      - outdoor workout
+      - football
+      - cricket
+    target_groups:
+      - all
+      - athletes
+    severity: DANGER
+    priority: 75
+    conditions:
+      temperature_2m:
+        gte: 38
+    summary: High ambient temperature triggers rapid heat exhaustion, hyperthermia, and dehydration during high-output exercise.
+    guidance: Ambient temperature at or above 38°C makes intense outdoor cardiovascular training dangerous. Metabolic heat dissipation is compromised, creating substantial heat stroke vulnerability.
+    required_actions:
+      - Shift exercise to air-conditioned indoor facilities
+      - If training outdoors, restrict to pre-dawn hours with electrolyte supplementation
+  - id: SOP-RUN-002
+    title: High UV Radiation Advisory for Outdoor Daytime Athletics
+    category: outdoor_exercise
+    scope: activity_specific
+    target_activities:
+      - running
+      - jogging
+      - cycling
+      - tennis
+      - outdoor gym
+      - hiking
+    target_groups:
+      - all
+    severity: CAUTION
+    priority: 60
+    conditions:
+      uv_index:
+        gte: 8
+    summary: Very high to extreme solar UV radiation causing rapid erythema (sunburn) and cellular skin damage.
+    guidance: UV index is 8 or higher. Unprotected skin can burn in under 15 minutes during peak sun hours. Vigorous exercise under direct midday sun should be rescheduled.
+    required_actions:
+      - Reschedule high-intensity training to early morning or post-5 PM
+      - Apply broad-spectrum SPF 50+ sunscreen, wear UV-protective sunglasses and a brimmed cap
+  - id: SOP-TRV-001
+    title: High Precipitation Probability & Road Travel Delays
+    category: travel_and_commute
+    scope: activity_specific
+    target_activities:
+      - travel
+      - driving
+      - commute
+      - road trip
+      - highway
+      - transit
+      - cab
+    target_groups:
+      - all
+    severity: CAUTION
+    priority: 55
+    conditions:
+      precipitation_probability:
+        gte: 70
+    summary: High probability of rain creating traffic slowdowns, hydroplaning risk, and arterial waterlogging.
+    guidance: Rain probability is 70% or greater. Expect commute disruptions, lowered vehicular visibility, and hydroplaning on expressways. Verify route waterlogging advisories before departure.
+    required_actions:
+      - Allocate an extra 30-45 minutes buffer for travel
+      - Inspect windshield wipers and headlights before departure
+      - Increase following distance from vehicles ahead
+  - id: SOP-TRV-002
+    title: Dense Fog & Visibility Hazard for Highway Motorists
+    category: travel_and_commute
+    scope: activity_specific
+    target_activities:
+      - travel
+      - driving
+      - commute
+      - road trip
+      - highway
+    target_groups:
+      - all
+    severity: DANGER
+    priority: 70
+    conditions:
+      any_of:
+        - weather_code:
+            in:
+              - 45
+              - 48
+        - composite:
+            relative_humidity_2m:
+              gte: 95
+            temperature_2m:
+              lte: 12
+            wind_speed_10m:
+              lte: 6
+    summary: Dense radiation or advection fog restricting forward vehicular visibility to hazardous thresholds.
+    guidance: Dense fog conditions present. Forward sight distance is critically impaired. Multi-vehicle pileups and expressway hazards are elevated.
+    required_actions:
+      - Use low-beam headlights and dedicated fog lights; avoid high beams
+      - Adhere strictly to lane markers and avoid overtaking on single-carriageway roads
+  - id: SOP-VULN-001
+    title: Elevated UV and Heat Advisory for Toddlers & Infants
+    category: vulnerable_groups
+    scope: activity_specific
+    target_activities:
+      - park
+      - walk
+      - playground
+      - stroller
+      - outing
+    target_groups:
+      - infants
+      - toddlers
+      - babies
+      - children
+      - kids
+    severity: DANGER
+    priority: 78
+    conditions:
+      any_of:
+        - uv_index:
+            gte: 7
+        - temperature_2m:
+            gte: 33
+    summary: Infants and young children possess thinner epidermis and undeveloped thermoregulatory mechanisms.
+    guidance: UV index is 7+ or ambient temperature exceeds 33°C. Infants and young toddlers overheat up to 5 times faster than adults and suffer acute solar skin burns rapidly. Avoid open playground play during midday hours.
+    required_actions:
+      - Keep children in shaded or climate-controlled environments between 10:30 AM and 4:30 PM
+      - Ensure lightweight cotton clothing, wide-brimmed hats, and frequent hydration
+  - id: SOP-VULN-002
+    title: Severe Cold Stress Warning for Senior Citizens
+    category: vulnerable_groups
+    scope: activity_specific
+    target_activities:
+      - walk
+      - morning walk
+      - park
+      - errands
+      - gardening
+    target_groups:
+      - elderly
+      - seniors
+      - grandparents
+      - aged
+    severity: CAUTION
+    priority: 65
+    conditions:
+      temperature_2m:
+        lte: 10
+    summary: Low ambient temperatures induce peripheral vasoconstriction, elevating blood pressure and cardiac load in older adults.
+    guidance: Temperatures at or below 10°C pose cardiovascular and joint risks for elderly individuals. Morning walks in biting cold can trigger sudden spikes in arterial blood pressure.
+    required_actions:
+      - Postpone morning walks until after sunrise when temperatures moderate
+      - Dress in multiple insulating thermal layers covering head, ears, and extremities
+  - id: SOP-VULN-003
+    title: Pavement Thermal Burn Hazard for Canine Pets
+    category: vulnerable_groups
+    scope: activity_specific
+    target_activities:
+      - dog walk
+      - pet walk
+      - walking dog
+      - pets
+      - animals
+    target_groups:
+      - pets
+      - dogs
+      - animals
+    severity: CAUTION
+    priority: 60
+    conditions:
+      temperature_2m:
+        gte: 31
+    summary: Asphalt and concrete surfaces absorb solar radiation, reaching temperatures 20-30°C higher than ambient air.
+    guidance: Air temperature exceeds 31°C. Asphalt absorbs heat and will severely burn canine paw pads within minutes of contact. Walk dogs only on grassy areas or before asphalt heats up.
+    required_actions:
+      - Perform the 7-second palm test on pavement before walking pets
+      - Walk pets exclusively on shaded grass or reschedule to early morning
+  - id: SOP-REC-001
+    title: Optimal Comfort Window for Picnics & Family Park Gatherings
+    category: outdoor_recreation
+    scope: activity_specific
+    target_activities:
+      - picnic
+      - park
+      - garden
+      - outdoor dining
+      - lawn
+      - family gathering
+    target_groups:
+      - all
+      - families
+      - children
+    severity: FAVORABLE
+    priority: 40
+    conditions:
+      type: fuzzy_composite
+      temperature_2m:
+        between:
+          - 18
+          - 29
+      precipitation:
+        lte: 0.1
+      precipitation_probability:
+        lte: 25
+      wind_speed_10m:
+        lte: 22
+      uv_index:
+        lte: 7
+    summary: Multi-parameter comfort envelope ensuring pleasant outdoor leisure without thermal, rain, or wind disruption.
+    guidance: Weather conditions are fully favorable for outdoor picnics and gatherings. Moderate temperature, low precipitation risk, and gentle breezes provide an ideal leisure environment.
+    required_actions:
+      - Enjoy outdoor recreation with standard sun care and hydration

@@ -1,0 +1,32 @@
+{
+  "name": "medibuddy-weather-advisory-bot",
+  "version": "1.0.0",
+  "description": "Production-grade Weather Advisory Support Bot powered by LangGraph, Express, and React",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "eval": "node evals/run_evals.mjs",
+    "build:frontend": "cd frontend && npm install && npm run build"
+  },
+  "keywords": [
+    "langgraph",
+    "weather-advisory",
+    "medibuddy",
+    "express",
+    "react"
+  ],
+  "author": "MediBuddy Brainwave Candidate",
+  "license": "ISC",
+  "dependencies": {
+    "@langchain/core": "^1.2.14",
+    "@langchain/langgraph": "^1.4.18",
+    "@langchain/openai": "^1.6.2",
+    "axios": "^1.20.0",
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.5",
+    "express": "^5.2.1",
+    "js-yaml": "^5.4.2"
+  }
+}
