@@ -216,7 +216,51 @@ npm run eval
 
 ---
 
-## 8. Frontend Features Overview
+## 8. Cloud Deployment (1-Click & Production Containers)
+
+The application is fully containerized and production-ready for instantaneous cloud deployment on platforms like Render, Railway, or Docker.
+
+### Option A: 1-Click Deploy to Render (Recommended - Free Web Service)
+
+Render automatically detects the [`render.yaml`](render.yaml) blueprint in the root:
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/akshatchitransh/medibuddy-weather-assistant)
+
+1. Click the **Deploy to Render** button above (or navigate to [dashboard.render.com](https://dashboard.render.com) > **New +** > **Blueprint**).
+2. Connect your GitHub repository: `akshatchitransh/medibuddy-weather-assistant`.
+3. Provide your `GEMINI_API_KEY` under the prompted environment variables.
+4. Render will run `npm install && npm run build` and launch the Express web service on a public HTTPS URL (e.g., `https://medibuddy-weather-assistant.onrender.com`).
+
+---
+
+### Option B: Deploy to Railway
+
+1. Go to [railway.app](https://railway.app) and select **New Project** > **Deploy from GitHub repo**.
+2. Select `akshatchitransh/medibuddy-weather-assistant`.
+3. Add the `GEMINI_API_KEY` in the **Variables** tab.
+4. Railway will automatically build and expose the app with zero additional configuration.
+
+---
+
+### Option C: Production Docker Container
+
+A multi-stage, secure Alpine Linux [`Dockerfile`](Dockerfile) is provided:
+
+```bash
+# Build the production image
+docker build -t medibuddy-weather-assistant .
+
+# Run the container
+docker run -d -p 4000:4000 \
+  -e GEMINI_API_KEY="your-gemini-api-key" \
+  --name medibuddy-bot \
+  medibuddy-weather-assistant
+```
+The application will be live at `http://localhost:4000`.
+
+---
+
+## 9. Frontend Features Overview
 
 * **Conversational Thread**: Supports multi-turn context carrying and follow-up queries.
 * **Live Weather Context Panel**: Displays exact temperature, wind speed, gusts, precipitation, probability, and UV index.
@@ -229,3 +273,4 @@ npm run eval
 
 *Built with precision for the MediBuddy Brainwave AI Product Engineering Team.*  
 *#wehealbycode*
+
