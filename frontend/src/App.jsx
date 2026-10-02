@@ -124,6 +124,7 @@ export default function App() {
   const [verification, setVerification] = useState(null);
   const [allSops, setAllSops] = useState([]);
   const [showAddSopModal, setShowAddSopModal] = useState(false);
+  const [mobileTab, setMobileTab] = useState("chat"); // "chat" | "inspector"
 
   // New SOP Form State for Live Interview Test
   const [newSopId, setNewSopId] = useState("SOP-LIVE-011");
@@ -318,23 +319,48 @@ export default function App() {
         <div className="header-actions">
           <div className="sop-counter-badge" onClick={() => setShowAddSopModal(true)} title="Click to view or add SOPs">
             <span className="pulse-dot"></span>
-            <strong>{allSops.length} Active SOPs</strong> Loaded
+            <strong>{allSops.length}</strong>
+            <span className="badge-text-full"> Active SOPs Loaded</span>
+            <span className="badge-text-short"> SOPs</span>
           </div>
 
           <button className="btn-secondary" onClick={() => setShowAddSopModal(true)}>
-            + Add 11th SOP Live
+            <span className="btn-text-full">+ Add 11th SOP Live</span>
+            <span className="btn-text-short">+ SOP</span>
           </button>
 
-          <button className="btn-outline" onClick={handleResetSession}>
-            Reset Session
+          <button className="btn-outline" onClick={handleResetSession} title="Reset session memory">
+            <span className="btn-text-full">Reset Session</span>
+            <span className="btn-text-short">Reset</span>
           </button>
         </div>
       </header>
 
+      {/* Mobile Tab Navigation Bar (Shown on small screens) */}
+      <nav className="mobile-tab-bar" aria-label="Mobile view navigation">
+        <button
+          type="button"
+          className={`mobile-tab-btn ${mobileTab === "chat" ? "active" : ""}`}
+          onClick={() => setMobileTab("chat")}
+        >
+          <span className="tab-icon">💬</span>
+          <span className="tab-text">Advisory Chat</span>
+        </button>
+        <button
+          type="button"
+          className={`mobile-tab-btn ${mobileTab === "inspector" ? "active" : ""}`}
+          onClick={() => setMobileTab("inspector")}
+        >
+          <span className="tab-icon">📊</span>
+          <span className="tab-text">Weather & SOPs</span>
+          {activeWeather?.effectiveMetrics && <span className="tab-live-dot" title="Live weather active" />}
+        </button>
+      </nav>
+
       {/* Main Workspace */}
       <div className="workspace">
         {/* Left Column: Conversational Thread */}
-        <main className="chat-pane">
+        <main className={`chat-pane ${mobileTab === "chat" ? "mobile-active" : "mobile-hidden"}`}>
           <div className="messages-list">
             {messages.map((m, idx) => (
               <div key={idx} className={`message-row ${m.role}`}>
@@ -416,7 +442,7 @@ export default function App() {
         </main>
 
         {/* Right Column: Live Policy & Weather Inspector */}
-        <aside className="inspector-pane">
+        <aside className={`inspector-pane ${mobileTab === "inspector" ? "mobile-active" : "mobile-hidden"}`}>
           <div className="inspector-card">
             <div className="card-header">
               <h3>Live Weather Context</h3>
