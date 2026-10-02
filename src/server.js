@@ -169,13 +169,15 @@ app.use((req, res, next) => {
   });
 });
 
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`=======================================================`);
-  console.log(` MediBuddy Weather-Advisory Assistant (LangGraph Engine)`);
-  console.log(` Express API Server listening locally on: http://localhost:${PORT}`);
-  console.log(` On Your Network (Mobile testing):      http://10.254.122.85:${PORT}`);
-  console.log(` Dynamic SOPs loaded: ${getActiveSOPs().length}`);
-  console.log(`=======================================================`);
-});
+if (!process.env.VERCEL) {
+  app.listen(PORT, "0.0.0.0", () => {
+    console.log(`=======================================================`);
+    console.log(` MediBuddy Weather-Advisory Assistant (LangGraph Engine)`);
+    console.log(` Express API Server listening locally on: http://localhost:${PORT}`);
+    console.log(` On Your Network (Mobile testing):      http://10.254.122.85:${PORT}`);
+    console.log(` Dynamic SOPs loaded: ${getActiveSOPs().length}`);
+    console.log(`=======================================================`);
+  });
+}
 
 export default app;
