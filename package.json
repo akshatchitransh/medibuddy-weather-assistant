@@ -6,9 +6,9 @@
   "type": "module",
   "scripts": {
     "start": "node src/server.js",
+    "build": "npm --prefix frontend install && npm --prefix frontend run build",
     "dev": "node --watch src/server.js",
-    "eval": "node evals/run_evals.mjs",
-    "build:frontend": "cd frontend && npm install && npm run build"
+    "eval": "node evals/run_evals.mjs"
   },
   "keywords": [
     "langgraph",
