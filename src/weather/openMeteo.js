@@ -41,7 +41,10 @@ export async function geocodeCity(cityName) {
       };
     }
 
-    // Pick first candidate as primary location
+    // Sort candidates by population descending so major cities take precedence
+    results.sort((a, b) => (b.population || 0) - (a.population || 0));
+
+    // Pick top candidate as primary location
     const topResult = results[0];
     return {
       success: true,

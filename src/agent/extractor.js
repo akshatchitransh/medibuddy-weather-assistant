@@ -2,7 +2,7 @@
  * Entity & Intent Extractor
  * Extracts location, activity, target demographic, and timeframe from user queries.
  * Integrates conversational memory: preserves previous turn's location/activity
- * when follow-ups (e.g., "what about this evening?") omit them.
+ * when follow-ups (e.g., "what about this evening?" or "in gorakhpur") omit them.
  */
 
 // Common activity keywords and mappings
@@ -31,13 +31,18 @@ const TIMEFRAME_KEYWORDS = [
   { match: ["now", "right now", "currently", "today"], timeframe: "now" },
 ];
 
-// Well-known Indian and global cities to extract reliably from free-form text
+// Major Indian and global cities to extract reliably from free-form text
 const KNOWN_CITIES = [
-  "bhopal", "mumbai", "delhi", "new delhi", "bengaluru", "bangalore", "chennai", "kolkata",
+  "gorakhpur", "bhopal", "mumbai", "delhi", "new delhi", "bengaluru", "bangalore", "chennai", "kolkata",
   "hyderabad", "pune", "ahmedabad", "jaipur", "lucknow", "kanpur", "indore", "nagpur",
   "patna", "coimbatore", "kochi", "chandigarh", "surat", "varanasi", "visakhapatnam",
-  "shimla", "dehradun", "srinagar", "goa", "london", "berlin", "new york", "paris", "tokyo",
-  "springfield", "singapore", "dubai"
+  "shimla", "dehradun", "srinagar", "goa", "agra", "prayagraj", "allahabad", "meerut",
+  "bareilly", "aligarh", "ghaziabad", "noida", "gurugram", "gurgaon", "faridabad",
+  "amritsar", "ludhiana", "jalandhar", "raipur", "ranchi", "jamshedpur", "bhubaneswar",
+  "cuttack", "guwahati", "thiruvananthapuram", "mysuru", "mysore", "mangaluru", "mangalore",
+  "gwalior", "jabalpur", "ujjain", "nashik", "aurangabad", "solapur", "kolhapur",
+  "vadodara", "baroda", "rajkot", "udaipur", "jodhpur", "kota", "london", "berlin",
+  "new york", "paris", "tokyo", "springfield", "singapore", "dubai"
 ];
 
 /**
@@ -79,31 +84,41 @@ export function extractIntentAndEntities(query, previousState = {}) {
   // 4. Extract Location
   let detectedLocation = null;
 
-  // Check known cities first
+  // Step 4A: Check known cities dictionary first (word boundary match)
   for (const city of KNOWN_CITIES) {
-    // Regex for whole word boundary
     const regex = new RegExp(`\\b${city}\\b`, "i");
     if (regex.test(q)) {
-      // Capitalize first letter
-      detectedLocation = city.charAt(0).toUpperCase() + city.slice(1);
+      detectedLocation = city.split(" ").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
       break;
     }
   }
 
-  // If not in known list, check common prepositional patterns: "in <City>", "at <City>", "for <City>"
+  // Step 4B: Robust Prepositional regex: "in Gorakhpur", "at Bhopal", "for Pune", "to Mumbai"
   if (!detectedLocation) {
-    const prepMatch = q.match(/\b(?:in|at|around|near|for)\s+([a-zA-Z\s]{2,20}?)(?:\s+(?:today|now|tomorrow|this|safe|is|can|should|[,\.\?!]|$))/i);
+    const prepRegex = /\b(?:in|at|around|near|for|to|of)\s+([a-zA-Z\s\-]+?)(?:\s+(?:today|now|tomorrow|tonight|this|this evening|this afternoon|this morning|safe|is|can|should|please)|[,\.\?!]|$)/i;
+    const prepMatch = q.match(prepRegex);
     if (prepMatch && prepMatch[1]) {
       const candidate = prepMatch[1].trim();
-      const skipWords = ["the", "my", "our", "this", "today", "a", "an", "good", "safe"];
-      if (!skipWords.includes(candidate.toLowerCase()) && candidate.length >= 3) {
-        detectedLocation = candidate.charAt(0).toUpperCase() + candidate.slice(1);
+      const skipWords = ["the", "my", "our", "this", "today", "a", "an", "good", "safe", "cycling", "running", "walking", "outdoor", "park", "picnic", "me", "it", "us", "there"];
+      if (!skipWords.includes(candidate.toLowerCase()) && candidate.length >= 2) {
+        detectedLocation = candidate.split(" ").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
       }
     }
   }
 
+  // Step 4C: Direct Location Answer (e.g., when replying to clarification with just "Gorakhpur" or "in Gorakhpur")
+  if (!detectedLocation) {
+    const stripped = q.replace(/^(?:in|at|for|near|around)\s+/i, "").replace(/[,\.\?!]+$/, "").trim();
+    const words = stripped.split(/\s+/);
+    const nonLocationWords = ["can", "i", "is", "it", "safe", "should", "we", "what", "about", "today", "now", "tomorrow", "cycling", "running", "walking", "picnic", "hello", "hi", "hey"];
+    const hasNonLocationWord = words.some(w => nonLocationWords.includes(w.toLowerCase()));
+    if (words.length <= 3 && !hasNonLocationWord && stripped.length >= 2) {
+      detectedLocation = stripped.split(" ").map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(" ");
+    }
+  }
+
   // 5. Contextual Memory Carrying (Multi-turn conversational continuity)
-  // If user says "what about this evening?", carry forward the previous location and activity!
+  // If user says "what about this evening?" or just specifies city "in Gorakhpur", carry forward context!
   const prevLocation = previousState.location?.name || null;
   const prevActivity = previousState.intent?.activity || null;
   const prevGroup = previousState.intent?.target_group || "all";
