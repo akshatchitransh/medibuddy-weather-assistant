@@ -331,7 +331,7 @@ export default function App() {
 
           <button className="btn-outline" onClick={handleResetSession} title="Reset session memory">
             <span className="btn-text-full">Reset Session</span>
-            <span className="btn-text-short">Reset</span>
+            <span className="btn-text-short">🔄</span>
           </button>
         </div>
       </header>
@@ -361,6 +361,17 @@ export default function App() {
       <div className="workspace">
         {/* Left Column: Conversational Thread */}
         <main className={`chat-pane ${mobileTab === "chat" ? "mobile-active" : "mobile-hidden"}`}>
+          {/* Mobile Live Weather Pill Banner */}
+          {activeWeather && activeWeather.effectiveMetrics && (
+            <div className="mobile-weather-pill" onClick={() => setMobileTab("inspector")} title="Tap to view full telemetry & SOP citations">
+              <span className="pill-dot">🟢</span>
+              <span className="pill-text">
+                <strong>{activeLocation?.name || "Detected"}:</strong> {activeWeather.effectiveMetrics.temperature_2m}°C • Wind: {activeWeather.effectiveMetrics.wind_speed_10m} km/h • {activeSop ? activeSop.id : "Live Telemetry"}
+              </span>
+              <span className="pill-action">Inspect 📊</span>
+            </div>
+          )}
+
           <div className="messages-list">
             {messages.map((m, idx) => (
               <div key={idx} className={`message-row ${m.role}`}>
@@ -443,6 +454,13 @@ export default function App() {
 
         {/* Right Column: Live Policy & Weather Inspector */}
         <aside className={`inspector-pane ${mobileTab === "inspector" ? "mobile-active" : "mobile-hidden"}`}>
+          <div className="mobile-inspector-back">
+            <button className="btn-back-to-chat" onClick={() => setMobileTab("chat")}>
+              ← Back to Chat
+            </button>
+            <span className="mobile-inspector-title">Telemetry & SOPs</span>
+          </div>
+
           <div className="inspector-card">
             <div className="card-header">
               <h3>Live Weather Context</h3>

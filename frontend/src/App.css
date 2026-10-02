@@ -776,8 +776,40 @@
  * RESPONSIVE DESIGN & MOBILE OPTIMIZATIONS
  * ============================================================================== */
 
-/* Tablet & Smaller Screens (< 1024px) */
-@media (max-width: 1024px) {
+/* Desktop & Laptop (> 900px): Dual Pane view always visible */
+@media (min-width: 901px) {
+  .mobile-tab-bar {
+    display: none !important;
+  }
+
+  .mobile-weather-pill {
+    display: none !important;
+  }
+
+  .mobile-inspector-back {
+    display: none !important;
+  }
+
+  .chat-pane {
+    display: flex !important;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .inspector-pane {
+    display: flex !important;
+    width: 380px;
+    flex-shrink: 0;
+  }
+
+  .badge-text-full { display: inline; }
+  .badge-text-short { display: none; }
+  .btn-text-full { display: inline; }
+  .btn-text-short { display: none; }
+}
+
+/* Tablet Screens (901px - 1100px) */
+@media (min-width: 901px) and (max-width: 1100px) {
   .inspector-pane {
     width: 330px;
     padding: 16px;
@@ -787,15 +819,15 @@
   }
 }
 
-/* Mobile & Small Tablets (< 900px) */
+/* Mobile & Small Tablets (<= 900px): Clean Adaptive Interface */
 @media (max-width: 900px) {
   .app-header {
-    height: 58px;
-    padding: 0 14px;
+    height: 56px;
+    padding: 0 12px;
   }
 
   .brand-title {
-    font-size: 16px;
+    font-size: 15px;
   }
 
   .brand-tagline {
@@ -807,7 +839,7 @@
     display: flex;
     background-color: #ffffff;
     border-bottom: 1px solid var(--border-light);
-    padding: 6px 12px;
+    padding: 6px 10px;
     gap: 8px;
     z-index: 20;
     flex-shrink: 0;
@@ -851,6 +883,76 @@
     box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.3);
   }
 
+  /* Mobile Live Weather Pill Banner inside Chat */
+  .mobile-weather-pill {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    background-color: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 8px;
+    padding: 8px 12px;
+    margin: 8px 12px 4px 12px;
+    cursor: pointer;
+    font-size: 12px;
+    color: #166534;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    animation: fadeIn 0.3s ease;
+  }
+
+  .pill-dot {
+    font-size: 10px;
+    flex-shrink: 0;
+  }
+
+  .pill-text {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .pill-action {
+    background-color: #ffffff;
+    border: 1px solid #86efac;
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-weight: 600;
+    color: #15803d;
+    white-space: nowrap;
+    font-size: 11px;
+    flex-shrink: 0;
+  }
+
+  /* Back to Chat button inside mobile inspector view */
+  .mobile-inspector-back {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .btn-back-to-chat {
+    background-color: #0077b6;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(0, 119, 182, 0.2);
+  }
+
+  .mobile-inspector-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #475569;
+  }
+
   /* Single Pane Stack in Workspace */
   .workspace {
     flex-direction: column;
@@ -870,13 +972,15 @@
     display: flex !important;
     flex: 1;
     width: 100%;
+    min-height: 0;
   }
 
   .inspector-pane {
     width: 100%;
     height: 100%;
-    padding: 16px;
+    padding: 14px;
     border-left: none;
+    min-height: 0;
   }
 
   .inspector-pane.mobile-hidden {
@@ -887,34 +991,36 @@
     display: flex !important;
     flex: 1;
     width: 100%;
+    min-height: 0;
   }
 
   .messages-list {
-    padding: 16px 14px;
+    padding: 14px 12px;
   }
 
   .message-row {
-    max-width: 92%;
+    max-width: 94%;
   }
 }
 
-/* Phone screens (< 640px) */
+/* Phone screens (<= 640px) */
 @media (max-width: 640px) {
   .app-header {
     height: 52px;
-    padding: 0 10px;
-    gap: 6px;
+    padding: 0 8px;
+    gap: 4px;
   }
 
   .brand-group {
-    gap: 8px;
+    gap: 6px;
+    flex-shrink: 0;
   }
 
   .brand-icon {
-    width: 32px;
-    height: 32px;
-    font-size: 14px;
-    border-radius: 8px;
+    width: 28px;
+    height: 28px;
+    font-size: 13px;
+    border-radius: 6px;
   }
 
   .brand-title {
@@ -931,7 +1037,8 @@
   }
 
   .header-actions {
-    gap: 6px;
+    gap: 4px;
+    flex-shrink: 0;
   }
 
   /* Toggle Short / Full text */
@@ -941,9 +1048,10 @@
   .btn-text-short { display: inline; }
 
   .sop-counter-badge {
-    padding: 4px 8px;
+    padding: 4px 6px;
     font-size: 11px;
-    gap: 5px;
+    gap: 4px;
+    white-space: nowrap;
   }
 
   .pulse-dot {
@@ -952,25 +1060,27 @@
   }
 
   .btn-primary, .btn-secondary, .btn-outline {
-    padding: 6px 10px;
-    font-size: 12px;
+    padding: 5px 8px;
+    font-size: 11.5px;
     border-radius: 6px;
+    white-space: nowrap;
   }
 
   .message-row {
-    max-width: 96%;
-    gap: 8px;
+    max-width: 98%;
+    gap: 6px;
   }
 
   .avatar {
-    width: 28px;
-    height: 28px;
-    font-size: 14px;
+    width: 26px;
+    height: 26px;
+    font-size: 13px;
   }
 
   .message-content {
     padding: 10px 12px;
     font-size: 13.5px;
+    border-radius: 10px;
   }
 
   .quick-prompts-bar {
@@ -987,27 +1097,29 @@
   .chip {
     padding: 4px 8px;
     font-size: 11.5px;
+    flex-shrink: 0;
   }
 
   .chat-input-form {
     padding: 8px 10px;
-    gap: 8px;
+    gap: 6px;
   }
 
   .chat-input {
-    padding: 10px 12px;
-    font-size: 16px; /* 16px avoids iOS mobile zoom */
-    border-radius: 8px;
+    padding: 9px 12px;
+    font-size: 16px !important; /* 16px strictly avoids iOS mobile zoom */
+    border-radius: 20px;
   }
 
   .btn-send {
     padding: 0 14px;
     font-size: 13px;
-    border-radius: 8px;
+    border-radius: 20px;
+    height: 38px;
   }
 
   .weather-grid {
-    gap: 8px;
+    gap: 6px;
   }
 
   .weather-stat {
@@ -1015,17 +1127,17 @@
   }
 
   .modal-content {
-    width: 94vw;
+    width: 95vw;
     max-height: 90dvh;
     border-radius: 12px;
   }
 
   .modal-header {
-    padding: 12px 16px;
+    padding: 12px 14px;
   }
 
   .modal-body {
-    padding: 14px;
+    padding: 12px 14px;
   }
 
   .condition-inputs {
@@ -1034,8 +1146,8 @@
   }
 }
 
-/* Very Small Phones (< 380px) */
-@media (max-width: 380px) {
+/* Very Small Phones (<= 360px) */
+@media (max-width: 360px) {
   .sop-counter-badge {
     display: none;
   }
@@ -1043,4 +1155,14 @@
   .brand-title {
     font-size: 13px;
   }
+
+  .btn-secondary, .btn-outline {
+    padding: 4px 6px;
+    font-size: 11px;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
 }

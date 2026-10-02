@@ -161,6 +161,7 @@ app.use(express.static(frontendDist));
 
 app.use((req, res, next) => {
   if (req.path.startsWith("/api")) return next();
+  res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
   res.sendFile(path.join(frontendDist, "index.html"), (err) => {
     if (err) {
       res.send(`<h2>MediBuddy Weather Advisory API is running on port ${PORT}.</h2><p>Frontend is available at http://localhost:${PORT}</p>`);
@@ -168,10 +169,11 @@ app.use((req, res, next) => {
   });
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`=======================================================`);
   console.log(` MediBuddy Weather-Advisory Assistant (LangGraph Engine)`);
-  console.log(` Express API Server listening on http://localhost:${PORT}`);
+  console.log(` Express API Server listening locally on: http://localhost:${PORT}`);
+  console.log(` On Your Network (Mobile testing):      http://10.254.122.85:${PORT}`);
   console.log(` Dynamic SOPs loaded: ${getActiveSOPs().length}`);
   console.log(`=======================================================`);
 });
