@@ -45,16 +45,73 @@ const KNOWN_CITIES = [
   "new york", "paris", "tokyo", "springfield", "singapore", "dubai"
 ];
 
+import { getLLM } from "./llm.js";
+
 /**
  * Extract intent and entities from current query and merge with session memory.
+ * Uses Google Gemini when available for semantic natural language understanding,
+ * with deterministic regex fallback for offline environments.
  * @param {string} query - Latest user message
  * @param {object} previousState - Existing state from conversation history
- * @returns {{activity: string|null, target_group: string, timeframe: string, location_name: string|null}}
+ * @returns {Promise<{activity: string|null, target_group: string, timeframe: string, location_name: string|null}>}
  */
-export function extractIntentAndEntities(query, previousState = {}) {
+export async function extractIntentAndEntities(query, previousState = {}) {
   const q = (query || "").toLowerCase();
 
-  // 1. Extract Activity
+  // Step 1: Use LLM (Google Gemini) for Natural Language Extraction when available
+  const { model } = await getLLM();
+  if (model && query && query.trim().length > 0) {
+    try {
+      const prompt = `
+You are an entity extractor for an outdoor activity weather safety assistant.
+Extract the outdoor activity, location, target demographic, and timeframe from the user's message.
+Return ONLY a valid JSON object with NO markdown formatting, NO backticks.
+
+Schema:
+{
+  "location_name": string or null (properly capitalized city/location name),
+  "activity": string or null (normalized to: cycling, running, walking, picnic, travel, sports, pet_walk),
+  "timeframe": string (now, morning, afternoon, evening, tomorrow),
+  "target_group": string (all, children, elderly, pets, sensitive)
+}
+
+Previous Conversation Context:
+- Previous Location: "${previousState.location?.name || ""}"
+- Previous Activity: "${previousState.intent?.activity || ""}"
+
+User Message: "${query.replace(/"/g, '\\"')}"
+`;
+
+      const response = await model.invoke(prompt);
+      const rawText = typeof response === "string" ? response : (response.content || String(response));
+      const cleanJson = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
+      const parsed = JSON.parse(cleanJson);
+
+      if (parsed) {
+        const prevLocation = previousState.location?.name || null;
+        const prevActivity = previousState.intent?.activity || null;
+        const prevGroup = previousState.intent?.target_group || "all";
+
+        const effectiveLocation = parsed.location_name || prevLocation;
+        const effectiveActivity = parsed.activity || prevActivity;
+        const effectiveGroup = (parsed.target_group && parsed.target_group !== "all") ? parsed.target_group : prevGroup;
+        const effectiveTimeframe = parsed.timeframe || "now";
+
+        return {
+          location_name: effectiveLocation ? effectiveLocation.charAt(0).toUpperCase() + effectiveLocation.slice(1) : null,
+          activity: effectiveActivity,
+          target_group: effectiveGroup,
+          timeframe: effectiveTimeframe,
+          extractedBy: "Google Gemini",
+          isFollowUp: !parsed.location_name && !parsed.activity && (!!prevLocation || !!prevActivity),
+        };
+      }
+    } catch (llmErr) {
+      console.warn(`[Extractor Layer] LLM extraction error, falling back to deterministic extractor:`, llmErr.message);
+    }
+  }
+
+  // Step 2: Deterministic Rule-Based Fallback (Offline / Zero-latency)
   let detectedActivity = null;
   for (const item of ACTIVITY_KEYWORDS) {
     if (item.match.some(kw => q.includes(kw))) {

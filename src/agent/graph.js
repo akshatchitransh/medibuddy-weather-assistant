@@ -23,7 +23,7 @@ import {
 // 1. Node: Extract Intent & Entities (with multi-turn context carrying)
 async function extractIntentNode(state) {
   const latestMessage = state.userInput || (state.messages?.[state.messages.length - 1]?.content) || "";
-  const extracted = extractIntentAndEntities(latestMessage, state);
+  const extracted = await extractIntentAndEntities(latestMessage, state);
 
   return {
     userInput: latestMessage,
