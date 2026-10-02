@@ -1,5 +1,5 @@
 version: 1.0.0
-last_updated: '2026-10-02T18:03:34.833Z'
+last_updated: '2026-10-02T18:06:16.666Z'
 sops:
   - id: SOP-SEV-001
     title: IMD Well-Marked Low Pressure System & Severe Monsoon Depression
@@ -100,6 +100,38 @@ sops:
     required_actions:
       - Reduce speed by at least 30%
       - Ensure high-visibility reflective rain gear and front/rear lights are activated
+  - id: SOP-CYC-003
+    title: Favorable & Safe Conditions for Cycling and Two-Wheelers
+    category: outdoor_exercise
+    scope: activity_specific
+    target_activities:
+      - cycling
+      - bike
+      - biking
+      - motorcycle
+      - scooter
+      - two-wheeler
+    target_groups:
+      - all
+    severity: FAVORABLE
+    priority: 35
+    conditions:
+      type: composite
+      temperature_2m:
+        between:
+          - 12
+          - 34
+      wind_speed_10m:
+        lte: 28
+      precipitation:
+        lte: 0.5
+      precipitation_probability:
+        lte: 30
+    summary: Favorable and calm weather conditions for two-wheeler commuting and cycling.
+    guidance: Weather conditions are safe and favorable for cycling and two-wheeler commuting. Road surfaces are dry, wind speeds are calm, and ambient temperatures are within a comfortable range.
+    required_actions:
+      - Wear an approved safety helmet and use reflective gear
+      - Maintain standard hydration and observe standard road safety rules
   - id: SOP-RUN-001
     title: Extreme Heat Index Risk for Vigorous Cardio / Runners
     category: outdoor_exercise
